@@ -3,31 +3,39 @@ package com.crainstorm.jerrydog.httpserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
 import java.io.*;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
  * Created by chen on 5/28/17.
  */
-public class Request {
+public class Request implements ServletRequest {
     private static final Logger logger = LogManager.getLogger(Request.class);
+
+    InputStream inputStream = null;
+
     private RequestMethod method = null;
     private String uri = null;
     private String protocolVersion = null;
     private Map<String, String> headers = new HashMap<>(32);
     private String body = null;
 
-
     public Request(InputStream inputStream) {
-        this.parse(inputStream);
+        this.inputStream = inputStream;
+        this.parse();
     }
 
-    private void parse(InputStream inputStream) {
+    private void parse() {
         if (logger.isDebugEnabled()) {
             logger.debug("start parse socket...");
         }
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(this.inputStream));
 
         try {
             // 1. parse request line
@@ -128,5 +136,151 @@ public class Request {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public Object getAttribute(String name) {
+        return null;
+    }
+
+    @Override
+    public Enumeration getAttributeNames() {
+        return null;
+    }
+
+    @Override
+    public String getCharacterEncoding() {
+        return null;
+    }
+
+    @Override
+    public void setCharacterEncoding(String env) throws UnsupportedEncodingException {
+
+    }
+
+    @Override
+    public int getContentLength() {
+        return 0;
+    }
+
+    @Override
+    public String getContentType() {
+        return null;
+    }
+
+    @Override
+    public ServletInputStream getInputStream() throws IOException {
+        return null;
+    }
+
+    @Override
+    public String getParameter(String name) {
+        return null;
+    }
+
+    @Override
+    public Enumeration getParameterNames() {
+        return null;
+    }
+
+    @Override
+    public String[] getParameterValues(String name) {
+        return new String[0];
+    }
+
+    @Override
+    public Map getParameterMap() {
+        return null;
+    }
+
+    @Override
+    public String getProtocol() {
+        return null;
+    }
+
+    @Override
+    public String getScheme() {
+        return null;
+    }
+
+    @Override
+    public String getServerName() {
+        return null;
+    }
+
+    @Override
+    public int getServerPort() {
+        return 0;
+    }
+
+    @Override
+    public BufferedReader getReader() throws IOException {
+        return null;
+    }
+
+    @Override
+    public String getRemoteAddr() {
+        return null;
+    }
+
+    @Override
+    public String getRemoteHost() {
+        return null;
+    }
+
+    @Override
+    public void setAttribute(String name, Object o) {
+
+    }
+
+    @Override
+    public void removeAttribute(String name) {
+
+    }
+
+    @Override
+    public Locale getLocale() {
+        return null;
+    }
+
+    @Override
+    public Enumeration getLocales() {
+        return null;
+    }
+
+    @Override
+    public boolean isSecure() {
+        return false;
+    }
+
+    @Override
+    public RequestDispatcher getRequestDispatcher(String path) {
+        return null;
+    }
+
+    @Deprecated
+    @Override
+    public String getRealPath(String path) {
+        return null;
+    }
+
+    @Override
+    public int getRemotePort() {
+        return 0;
+    }
+
+    @Override
+    public String getLocalName() {
+        return null;
+    }
+
+    @Override
+    public String getLocalAddr() {
+        return null;
+    }
+
+    @Override
+    public int getLocalPort() {
+        return 0;
     }
 }

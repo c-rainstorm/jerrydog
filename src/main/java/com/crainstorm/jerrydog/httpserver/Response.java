@@ -5,38 +5,44 @@ import org.apache.logging.log4j.Logger;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MimeTypes;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
 import java.io.*;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by chen on 5/28/17.
  */
-public class Response {
+public class Response implements ServletResponse {
     private static final Logger logger = LogManager.getLogger(Response.class);
+
+    private OutputStream outputStream = null;
     private Request request = null;
 
-    public Response(Request request) {
-        this.request = request;
 
+    public Response(Request request, OutputStream outputStream) {
+        this.request = request;
+        this.outputStream = outputStream;
     }
 
-    public void sendStaticResource(OutputStream outputStream) {
+    public void sendStaticResource() {
         File file = new File(HttpServer.WEB_ROOT, this.request.getUri());
         if (logger.isDebugEnabled()) {
             logger.debug("File path: " + file.getAbsolutePath());
         }
         try {
             if (file.exists()) {
-                writeFileToSocket(file, outputStream);
+                writeFileToSocket(file);
             } else {
-                writeNotFound(outputStream);
+                writeNotFound();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void writeNotFound(OutputStream outputStream) throws IOException {
+    private void writeNotFound() throws IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("static resource not found!");
         }
@@ -48,10 +54,10 @@ public class Response {
                 .append("\r\n")
                 .append("<h1>File Not Found</h1>");
 
-        outputStream.write(builder.toString().getBytes());
+        this.outputStream.write(builder.toString().getBytes());
     }
 
-    private void writeFileToSocket(File file, OutputStream outputStream) throws IOException {
+    private void writeFileToSocket(File file) throws IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("start write resource to socket...");
         }
@@ -79,7 +85,7 @@ public class Response {
                 .append(file.length()).append("\r\n");
 
         builder.append("\r\n");
-        outputStream.write(builder.toString().getBytes());
+        this.outputStream.write(builder.toString().getBytes());
 
         // 3. file content
         inputStream = new FileInputStream(file);
@@ -88,7 +94,7 @@ public class Response {
         byte[] buff = new byte[BUFFER_SIZE];
         int readedNum = 0;
         while ((readedNum = inputStream.read(buff, 0, BUFFER_SIZE)) != -1) {
-            outputStream.write(buff, 0, readedNum);
+            this.outputStream.write(buff, 0, readedNum);
         }
         inputStream.close();
         if (logger.isDebugEnabled()) {
@@ -97,5 +103,80 @@ public class Response {
     }
 
     public static void main(String[] args) {
+    }
+
+    @Override
+    public String getCharacterEncoding() {
+        return null;
+    }
+
+    @Override
+    public String getContentType() {
+        return null;
+    }
+
+    @Override
+    public ServletOutputStream getOutputStream() throws IOException {
+        return null;
+    }
+
+    @Override
+    public PrintWriter getWriter() throws IOException {
+        return new PrintWriter(this.outputStream, true);
+    }
+
+    @Override
+    public void setCharacterEncoding(String charset) {
+
+    }
+
+    @Override
+    public void setContentLength(int len) {
+
+    }
+
+    @Override
+    public void setContentType(String type) {
+
+    }
+
+    @Override
+    public void setBufferSize(int size) {
+
+    }
+
+    @Override
+    public int getBufferSize() {
+        return 0;
+    }
+
+    @Override
+    public void flushBuffer() throws IOException {
+
+    }
+
+    @Override
+    public void resetBuffer() {
+
+    }
+
+    @Override
+    public boolean isCommitted() {
+        return false;
+    }
+
+    @Override
+    public void reset() {
+
+    }
+
+    @Override
+    public void setLocale(Locale loc) {
+
+    }
+
+    @Override
+    public Locale getLocale() {
+        return null;
     }
 }

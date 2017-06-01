@@ -16,7 +16,7 @@ public class HttpServer {
 
     private static final Logger logger = LogManager.getLogger(HttpServer.class);
     public static final String SHUTDOWN = "/shutdown";
-    public static final String WEB_ROOT = System.getenv("JERRYDOG_HOME") + File.separator + "webapps";
+    public static final String WEB_ROOT = System.getenv("JERRYDOG_HOME") + File.separator + "webroot";
 
     public static void main(String[] args) {
         HttpServer httpServer = new HttpServer();
@@ -28,7 +28,7 @@ public class HttpServer {
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(9704, 1, InetAddress.getByName("localhost"));
-            if(logger.isDebugEnabled()){
+            if (logger.isDebugEnabled()) {
                 logger.debug("ServerSocket opened! " + serverSocket);
             }
         } catch (IOException e) {
@@ -42,19 +42,24 @@ public class HttpServer {
         while (!shutdown) {
             try {
                 clientSocket = serverSocket.accept();
-                if(logger.isDebugEnabled()){
+                if (logger.isDebugEnabled()) {
                     logger.debug("receive a connection... " + clientSocket);
                 }
 
                 Request request = new Request(clientSocket.getInputStream());
-                Response response = new Response(request);
+                Response response = new Response(request, clientSocket.getOutputStream());
 
-                if(logger.isDebugEnabled()){
+                if (logger.isDebugEnabled()) {
                     logger.debug("Request: \n" + request);
                 }
 
-                response.sendStaticResource(clientSocket.getOutputStream());
-
+                if (request.getUri().startsWith("/servlet/")) {
+                    ServletProcessor servlet = new ServletProcessor();
+                    servlet.process(request, response);
+                } else {
+                    StaticResourceProcessor staticResource = new StaticResourceProcessor();
+                    staticResource.process(request, response);
+                }
                 clientSocket.close();
 
                 shutdown = request.getUri().equals(HttpServer.SHUTDOWN);
