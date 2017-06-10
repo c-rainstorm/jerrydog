@@ -19,6 +19,7 @@
 - [jerrydog](#jerrydog)
     - [静态资源服务器](#静态资源服务器)
     - [简易 Servlet 容器](#简易-servlet-容器)
+    - [分离 Connector 模块](#分离-connector-模块)
 
 <!-- /TOC -->
 
@@ -35,3 +36,11 @@
 - 对应仓库 `TAG`： `simple-servlet-container`
 - 主要思路: 使用 `URLClassloader` 加载 `servlet` 类并调用其 `service` 方法。使用了门面模式对 `Request` 和 `Response` 进行了封装，避免程序员获取过多权限。
 - 测试 URL： `http://localhost:9704/servlet/TestServlet`
+
+## 分离 Connector 模块
+
+- 对应仓库 `TAG`： 还有些地方不理解，暂未打 `TAG`。
+- 主要思路：分离出 `Bootstrap` 类用于启动 `Connector`, `Connector` 负责开启服务器监听并将作作相应处理，对 `Request` 和 `Response` 的处理较之前的两个版本更加细化。
+- 测试 URL：
+    1. `http://localhost:9704/index.html`
+    1. `http://localhost:9704/servlet/TestServlet`

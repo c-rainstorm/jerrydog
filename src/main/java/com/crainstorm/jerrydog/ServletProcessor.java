@@ -1,5 +1,6 @@
-package com.crainstorm.jerrydog.httpserver;
+package com.crainstorm.jerrydog;
 
+import com.crainstorm.jerrydog.connector.http.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,7 +29,7 @@ public class ServletProcessor {
             // scan directories
             URL[] urls = new URL[1];
             URLStreamHandler streamHandler = null;
-            File classPath = new File(HttpServer.WEB_ROOT);
+            File classPath = new File(Constants.WEB_ROOT);
             String repository = null;
             repository = (new URL("file",
                     null, classPath.getCanonicalPath() + File.separator))
@@ -40,8 +41,8 @@ public class ServletProcessor {
         }
     }
 
-    public void process(Request request, Response response) {
-        String uri = request.getUri();
+    public void process(HttpRequest request, HttpResponse response) {
+        String uri = request.getRequestURI();
         String servletName = uri.substring(uri.lastIndexOf("/") + 1);
 
         if (logger.isDebugEnabled()) {
@@ -60,8 +61,8 @@ public class ServletProcessor {
                 servlets.put(servletName, servlet);
             }
 
-            RequestFacade req = new RequestFacade(request);
-            ResponseFacade res = new ResponseFacade(response);
+            HttpRequestFacade req = new HttpRequestFacade(request);
+            HttpResponseFacade res = new HttpResponseFacade(response);
             // call servlet's service method
             servlet.service(req, res);
 
