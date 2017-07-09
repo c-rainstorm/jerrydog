@@ -16,10 +16,10 @@
 
 <!-- TOC -->
 
-- [jerrydog](#jerrydog)
-    - [静态资源服务器](#静态资源服务器)
-    - [简易 Servlet 容器](#简易-servlet-容器)
-    - [分离 Connector 模块](#分离-connector-模块)
+- [静态资源服务器](#静态资源服务器)
+- [简易 Servlet 容器](#简易-servlet-容器)
+- [分离 Connector 模块](#分离-connector-模块)
+- [独立 Container 模块](#独立-container-模块)
 
 <!-- /TOC -->
 
@@ -44,3 +44,11 @@
 - 测试 URL：
     1. `http://localhost:9704/index.html`
     1. `http://localhost:9704/servlet/TestServlet`
+
+## 独立 Container 模块
+
+- 对应仓库 `TAG`： `container`
+- 主要思路： `container` 模块使用 `pipeline` 和 `valve` 来对 `request` 和 `response` 进行处理，`pipeline` 意为流水线，`valve` 意为阀，他们对请求的处理类似与过滤链和过滤器。`valve` 中有一个特殊的 `basic valve`, `Wrapper` 中的用来加载 `servlet` 和调用 `service` 方法，`Context` 中的用来映射到相应的 `Wrapper`。
+- 测试 URL(因为使用了 `Tomcat` 的连接器，所以默认端口号为 8080；)：
+    1. `http://localhost:8080/Primitive`
+    1. `http://localhost:8080/Modern`
