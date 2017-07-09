@@ -20,6 +20,7 @@
 - [简易 Servlet 容器](#简易-servlet-容器)
 - [分离 Connector 模块](#分离-connector-模块)
 - [独立 Container 模块](#独立-container-模块)
+- [Lifecycle & Logger](#lifecycle--logger)
 
 <!-- /TOC -->
 
@@ -52,3 +53,9 @@
 - 测试 URL(因为使用了 `Tomcat` 的连接器，所以默认端口号为 8080；)：
     1. `http://localhost:8080/Primitive`
     1. `http://localhost:8080/Modern`
+
+## Lifecycle & Logger
+
+- 主要思路：
+    1. 容器中包含一个 `LifecycleSupport` 属性，该属性负责维护这个容器的所有监听器和事件触发，该类维护一个监听器数组，当外部有触发事件时，先复制一份监听器数组，然后逐一调用监听器。自定义的监听器类都实现了 `LifecycleListener` 接口。
+    1. 容器中包含一个 `Logger` 域，并自定义一系列依赖该 `Logger` 的 `log()` 方法，在类中直接使用自定义的方法。因为该域是接口，所以我们可以自由定制使用的实现类。

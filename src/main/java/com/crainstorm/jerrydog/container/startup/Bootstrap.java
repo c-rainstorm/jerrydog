@@ -1,14 +1,12 @@
 package com.crainstorm.jerrydog.container.startup;
 
-import com.crainstorm.jerrydog.container.core.SimpleContext;
-import com.crainstorm.jerrydog.container.core.SimpleContextMapper;
-import com.crainstorm.jerrydog.container.core.SimpleLoader;
-import com.crainstorm.jerrydog.container.core.SimpleWrapper;
+import com.crainstorm.jerrydog.container.core.*;
 import com.crainstorm.jerrydog.container.valves.ClientIPLoggerValve;
 import com.crainstorm.jerrydog.container.valves.HeaderLoggerValve;
 import org.apache.catalina.*;
 import org.apache.catalina.connector.http.HttpConnector;
-import org.apache.logging.log4j.*;
+import org.apache.catalina.logger.FileLogger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 
@@ -20,7 +18,6 @@ import java.io.IOException;
  * 5. 初始化 Loader 并关联到 Context
  * 6. 添加 ServletMapping 到 Context
  * 7. 关联 Context 到 Connector
- *
  */
 public class Bootstrap {
 
@@ -49,8 +46,8 @@ public class Bootstrap {
         Valve headerLogger = new HeaderLoggerValve();
         Valve clientIPLogger = new ClientIPLoggerValve();
 
-        ((Pipeline)context).addValve(headerLogger);
-        ((Pipeline)context).addValve(clientIPLogger);
+        ((Pipeline) context).addValve(headerLogger);
+        ((Pipeline) context).addValve(clientIPLogger);
 
         logger.debug("add Valve..");
 
@@ -59,6 +56,10 @@ public class Bootstrap {
         context.addMapper(mapper);
 
         logger.debug("add mapper");
+
+        // add lifecycle listener
+        LifecycleListener listener = new SimpleContextLifecycleListener();
+        ((Lifecycle) context).addLifecycleListener(listener);
 
         Loader loader = new SimpleLoader();
         context.setLoader(loader);
@@ -69,13 +70,21 @@ public class Bootstrap {
         context.addServletMapping("/Modern", "Modern");
         logger.debug("add servlet mapping...");
 
+        System.setProperty("catalina.base", System.getenv("JERRYDOG_HOME"));
+        FileLogger logger = new FileLogger();
+        logger.setPrefix("FileLog_");
+        logger.setTimestamp(true);
+        context.setLogger(logger);
+
         connector.setContainer(context);
 
         try {
             connector.initialize();
-            connector.start();
+            ((Lifecycle) connector).start();
+            ((Lifecycle) context).start();
 
             System.in.read();
+            ((Lifecycle) context).stop();
         } catch (LifecycleException e) {
             e.printStackTrace();
         } catch (IOException e) {

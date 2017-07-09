@@ -8,7 +8,7 @@ import java.io.IOException;
 /**
  * Created by chen on 7/8/17.
  */
-public class SimplePipeline implements Pipeline {
+public class SimplePipeline implements Pipeline, Lifecycle {
     public SimplePipeline(Container container) {
         setContainer(container);
     }
@@ -24,6 +24,8 @@ public class SimplePipeline implements Pipeline {
     public void setContainer(Container container) {
         this.container = container;
     }
+
+    //----------------------- Pipeline --------------------------
 
     @Override
     public Valve getBasic() {
@@ -61,6 +63,32 @@ public class SimplePipeline implements Pipeline {
 
     @Override
     public void removeValve(Valve valve) {
+
+    }
+
+    //-------------------------------- LifeCycle -------------------------
+    @Override
+    public void addLifecycleListener(LifecycleListener lifecycleListener) {
+
+    }
+
+    @Override
+    public LifecycleListener[] findLifecycleListeners() {
+        return new LifecycleListener[0];
+    }
+
+    @Override
+    public void removeLifecycleListener(LifecycleListener lifecycleListener) {
+
+    }
+
+    @Override
+    public synchronized void start() throws LifecycleException {
+        System.out.println("Starting SimplePipeline..");
+    }
+
+    @Override
+    public void stop() throws LifecycleException {
 
     }
 

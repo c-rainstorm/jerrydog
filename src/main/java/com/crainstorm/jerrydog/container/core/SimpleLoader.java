@@ -1,8 +1,6 @@
 package com.crainstorm.jerrydog.container.core;
 
-import org.apache.catalina.Container;
-import org.apache.catalina.DefaultContext;
-import org.apache.catalina.Loader;
+import org.apache.catalina.*;
 
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -15,7 +13,7 @@ import java.net.URLStreamHandler;
 /**
  * Created by chen on 7/8/17.
  */
-public class SimpleLoader implements Loader {
+public class SimpleLoader implements Loader, Lifecycle {
 
     public static final String WEB_ROOT = System.getenv("JERRYDOG_HOME") + File.separator + "webroot";
 
@@ -114,6 +112,32 @@ public class SimpleLoader implements Loader {
 
     @Override
     public void removePropertyChangeListener(PropertyChangeListener propertyChangeListener) {
+
+    }
+
+    //---------------------------- LifeCycle --------------------------
+    @Override
+    public void addLifecycleListener(LifecycleListener lifecycleListener) {
+
+    }
+
+    @Override
+    public LifecycleListener[] findLifecycleListeners() {
+        return new LifecycleListener[0];
+    }
+
+    @Override
+    public void removeLifecycleListener(LifecycleListener lifecycleListener) {
+
+    }
+
+    @Override
+    public void start() throws LifecycleException {
+        System.out.println("Starting SimpleLoader");
+    }
+
+    @Override
+    public void stop() throws LifecycleException {
 
     }
 }

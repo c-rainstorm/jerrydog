@@ -3,6 +3,8 @@ package com.crainstorm.jerrydog.container.core;
 import org.apache.catalina.*;
 import org.apache.catalina.deploy.*;
 import org.apache.catalina.util.CharsetMapper;
+import org.apache.catalina.util.LifecycleSupport;
+import org.apache.logging.log4j.core.LifeCycle;
 
 import javax.naming.directory.DirContext;
 import javax.servlet.ServletContext;
@@ -13,9 +15,8 @@ import java.util.HashMap;
 
 /**
  * 一个 SimpleContext 代表一个 application, 使用 pipeline 来处理请求并生成相应的 response。
- *
  */
-public class SimpleContext implements Context, Pipeline {
+public class SimpleContext implements Context, Pipeline, Lifecycle {
 
     public SimpleContext() {
         pipeline.setBasic(new SimpleContextValve(this));
@@ -26,16 +27,20 @@ public class SimpleContext implements Context, Pipeline {
     // children containers
     protected HashMap<String, Container> children = new HashMap<>();
     // application class loader
-    protected Loader loader = null;
+    private Loader loader = null;
+
+    private Logger logger = null;
     // pipeline to process request and response
-    protected SimplePipeline pipeline = new SimplePipeline(this);
+    private SimplePipeline pipeline = new SimplePipeline(this);
     // application servlet mapping
-    protected HashMap<String, String> servletMappings = new HashMap<>();
+    private HashMap<String, String> servletMappings = new HashMap<>();
     // default mapper
     protected Mapper mapper = null;
     // todo why different protocol need different mapper
     protected HashMap<String, Mapper> mappers = new HashMap<>();
 
+    protected LifecycleSupport lifecycle = new LifecycleSupport(this);
+    protected boolean started = false;
 
     @Override
     public Object[] getApplicationListeners() {
@@ -674,12 +679,12 @@ public class SimpleContext implements Context, Pipeline {
 
     @Override
     public Logger getLogger() {
-        return null;
+        return logger;
     }
 
     @Override
     public void setLogger(Logger logger) {
-
+        this.logger = logger;
     }
 
     @Override
@@ -882,5 +887,86 @@ public class SimpleContext implements Context, Pipeline {
     @Override
     public void removePropertyChangeListener(PropertyChangeListener propertyChangeListener) {
 
+    }
+
+    @Override
+    public void addLifecycleListener(LifecycleListener lifecycleListener) {
+        this.lifecycle.addLifecycleListener(lifecycleListener);
+    }
+
+    @Override
+    public LifecycleListener[] findLifecycleListeners() {
+        return this.lifecycle.findLifecycleListeners();
+    }
+
+    @Override
+    public void removeLifecycleListener(LifecycleListener lifecycleListener) {
+        this.lifecycle.removeLifecycleListener(lifecycleListener);
+    }
+
+    @Override
+    public synchronized void start() throws LifecycleException {
+        log("starting Context...");
+        if (started) {
+            throw new LifecycleException("SimpleContext has already started");
+        }
+
+        this.lifecycle.fireLifecycleEvent(BEFORE_START_EVENT, null);
+        started = true;
+
+        if (loader != null && loader instanceof Lifecycle) {
+            ((Lifecycle) loader).start();
+        }
+        if (pipeline != null && pipeline instanceof Lifecycle) {
+            ((Lifecycle) pipeline).start();
+        }
+
+        Container[] children = findChildren();
+        for (int i = 0; i < children.length; ++i) {
+            if (children[i] instanceof Lifecycle) {
+                ((Lifecycle) children[i]).start();
+            }
+        }
+        this.lifecycle.fireLifecycleEvent(START_EVENT, null);
+
+
+        this.lifecycle.fireLifecycleEvent(AFTER_START_EVENT, null);
+        log("Context started");
+    }
+
+    @Override
+    public void stop() throws LifecycleException {
+        log("stopping Context");
+        if (!started) {
+            throw new LifecycleException("SimpleContext has already stopped");
+        }
+        this.lifecycle.fireLifecycleEvent(BEFORE_STOP_EVENT, null);
+        started = false;
+
+        if (loader != null && loader instanceof LifeCycle) {
+            ((LifeCycle) loader).stop();
+        }
+
+        if (pipeline != null && pipeline instanceof LifeCycle) {
+            ((LifeCycle) pipeline).stop();
+        }
+
+        Container[] children = findChildren();
+        for (int i = 0; i < children.length; ++i) {
+            if (children[i] instanceof LifeCycle) {
+                ((Lifecycle) children[i]).stop();
+            }
+        }
+        this.lifecycle.fireLifecycleEvent(STOP_EVENT, null);
+
+        this.lifecycle.fireLifecycleEvent(AFTER_STOP_EVENT, null);
+        log("Context stopped");
+    }
+
+    private void log(String message) {
+        Logger logger = this.getLogger();
+        if (logger != null) {
+            logger.log(message);
+        }
     }
 }
