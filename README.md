@@ -21,6 +21,7 @@
 - [分离 Connector 模块](#分离-connector-模块)
 - [独立 Container 模块](#独立-container-模块)
 - [Lifecycle & Logger](#lifecycle--logger)
+- [Loader](#loader)
 
 <!-- /TOC -->
 
@@ -59,3 +60,7 @@
 - 主要思路：
     1. 容器中包含一个 `LifecycleSupport` 属性，该属性负责维护这个容器的所有监听器和事件触发，该类维护一个监听器数组，当外部有触发事件时，先复制一份监听器数组，然后逐一调用监听器。自定义的监听器类都实现了 `LifecycleListener` 接口。
     1. 容器中包含一个 `Logger` 域，并自定义一系列依赖该 `Logger` 的 `log()` 方法，在类中直接使用自定义的方法。因为该域是接口，所以我们可以自由定制使用的实现类。
+
+## Loader
+
+- 主要思路： 因为该部分比较重要，所以打算较深入的学习一下。详情请查阅 [谈谈Java类加载机制](https://github.com/c-rainstorm/blog/blob/master/reading-notes/%E8%B0%88%E8%B0%88Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6.md);
