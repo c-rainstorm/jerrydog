@@ -22,6 +22,7 @@
 - [独立 Container 模块](#独立-container-模块)
 - [Lifecycle & Logger](#lifecycle--logger)
 - [Loader](#loader)
+- [Session](#session)
 
 <!-- /TOC -->
 
@@ -64,3 +65,7 @@
 ## Loader
 
 - 主要思路： 因为该部分比较重要，所以打算较深入的学习一下。详情请查阅 [谈谈Java类加载机制](https://github.com/c-rainstorm/blog/blob/master/reading-notes/%E8%B0%88%E8%B0%88Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6.md);
+
+## Session
+
+- 主要思路： Tomcat 通过 `Manager` 来进行 Session 管理。所有的 Session 在服务器中存在的形式是 `StandardSession` 对象，以 `SessionID` 为 key，存放在 `HashMap` 中，当有新的 Request 时，通过其中的 `SessionID` 在 `Manager` 中查找，若找不到则新建一个，然后将查找到或新建的 Session 对象保存到 Request 中以备后来使用。
